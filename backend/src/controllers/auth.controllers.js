@@ -1,3 +1,4 @@
+import { upsertStreamUser } from "../lib/stream.js";
 import User from "../models/User.js";
 import { generateToken, setCookie } from "../utils/token.js";
 
@@ -33,6 +34,17 @@ export async function signup(req, res) {
             profilePic: randAvatar,
         })  
         
+        try {
+            await upsertStreamUser({
+                id:newUser._id.toString(),
+                name: newUser.fullName,
+                image: newUser.profilePic || "",
+            });
+            console.log(`Stream user created for ${newUser.fullName}`);
+        } catch (error) {
+            console.error("Error creating Stream user:", error);
+        }
+
         setCookie(res, newUser._id);
 
         res.status(201).json({success: true, user: newUser});
